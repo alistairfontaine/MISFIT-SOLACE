@@ -88,9 +88,13 @@ void runThoughtShredderAsync(int inputChar) {
         g_subStateStep = 0;
         g_currentState = AppState::MainMenu;
         g_menuNeedsRedraw = true;
-    } else if (inputChar != 0 && inputChar != 10) { // Filter out structural carriage returns
-        g_thoughtBuffer += (char)inputChar;
-        std::cout << (char)inputChar << std::flush;
+    } else if (inputChar != 0) {
+        if (inputChar == 10) { // If user hits Enter, break line cleanly on web canvas
+            std::cout << "\n>> " << std::flush;
+        } else {
+            g_thoughtBuffer += (char)inputChar;
+            std::cout << (char)inputChar << std::flush;
+        }
     }
 }
 
