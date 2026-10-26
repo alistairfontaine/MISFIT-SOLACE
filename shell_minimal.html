@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Enforce hard first-principles cache clearing protocols directly inside the browser headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>MISFIT-SOLACE // OPERATIONAL TERMINAL</title>
+    <style>
+        body { background-color: #0d0d0d; color: #a3a3a3; font-family: monospace; padding: 20px; display: flex; flex-direction: column; height: 92vh; margin: 0; }
+        #header { color: #555; font-size: 12px; margin-bottom: 5px; }
+        #output { background: none; border: none; color: #00ff00; width: 100%; flex-grow: 1; resize: none; outline: none; font-family: monospace; font-size: 14px; margin-bottom: 10px; line-height: 18px; }
+        #input-container { display: flex; border-top: 1px solid #222; padding-top: 8px; }
+        #prompt { color: #00ff00; margin-right: 8px; font-weight: bold; }
+        #input { background: none; border: none; color: #ffffff; flex-grow: 1; outline: none; font-family: monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div id="header">// MISFIT-SOLACE // ASYNC WEB ASSEMBLY DESKTOP INTERFACE CORE</div>
+    <hr style="border: 0.5px solid #222; margin-bottom: 10px;">
+    <textarea id="output" readonly></textarea>
+    <div id="input-container">
+        <span id="prompt">>></span>
+        <input type="text" id="input" autofocus autocomplete="off">
+    </div>
+
+    <script>
+        window.misfitInputQueue = [];
+
+        var Module = {
+            print: (function() {
+                var element = document.getElementById('output');
+                return function(text) {
+                    if (element) {
+                        // Dynamically screen text buffers for ANSI clear codes to prevent render overflows
+                        if (text.includes('[2J') || text.includes('[1;1H')) {
+                            element.value = '';
+                            text = text.replace(/ \[2J \[1;1H/g, '')
+                                       .replace(/\[2J\s*\[1;1H/g, '')
+                                       .replace(/ \[2J/g, '')
+                                       .replace(/ \[1;1H/g, '');
+                        }
+                        if (text.trim().length > 0 || text === "\n") {
+                            element.value += text + "\n";
+                            element.scrollTop = element.scrollHeight;
+                        }
+                    }
+                };
+            })()
+        };
+
+        document.getElementById('input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var inputVal = this.value;
+                
+                // Route characters token bytes into standard window buffer memory arrays
+                for (var i = 0; i < inputVal.length; i++) {
+                    window.misfitInputQueue.push(inputVal.charCodeAt(i));
+                }
+                window.misfitInputQueue.push(10); // Inject explicit terminal newline code
+                this.value = '';
+            }
+        });
+    </script>
+    
+    {{{ SCRIPT }}}
+</body>
+</html>
+
